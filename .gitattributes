@@ -1,8 +1,27 @@
-# 统一换行符，避免跨机器拷贝后批处理失效
+# 换行符规则：核心目的只有一个 —— 让 .bat 在仓库里始终是 CRLF。
 #
-# Windows 的 cmd.exe 对 LF 换行的 .bat 支持不完整，
-# call :label / goto 这类跳转在 LF 文件里可能直接失败。
-# 所以 .bat / .cmd 强制 CRLF，其余文本统一 LF。
+# 为什么要 CRLF：Windows 的 cmd.exe 对 LF 换行的批处理支持不完整，
+# `call :label` / `goto` 这类跳转在 LF 文件里可能直接失效。
+# 本项目「启动签到.bat」大量使用 call :findpy 等标签跳转，
+# 一旦变成 LF，拿到新电脑上可能一上来就坏。
+#
+# 踩过的坑：只写 `*.bat text eol=crlf` 是**不够的**。
+# 前面的 `* text=auto eol=lf` 会先命中 .bat，实际生效的仍是 lf，
+# 结果 index 里存的是 LF、工作区被转成 CRLF，git status 永远显示已修改，
+# 而且 clone 到别的机器 .bat 会是 LF。所以必须让 .bat 规则
+# 排在后面且不被前面的 auto 规则覆盖 —— 用 -text 直接关掉转换最稳。
+#
+# 其余文件统一 LF，交给 git 自己判断是否文本。
+
 * text=auto eol=lf
-*.bat text eol=crlf
-*.cmd text eol=crlf
+
+# 批处理：禁用一切换行符转换，仓库里和工作区都保持原样（CRLF）
+*.bat -text
+*.cmd -text
+
+# 明确标记为二进制，避免被当文本处理
+*.png binary
+*.jpg binary
+*.ico binary
+*.exe binary
+*.zip binary
