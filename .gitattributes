@@ -1,0 +1,8 @@
+# 统一换行符，避免跨机器拷贝后批处理失效
+#
+# Windows 的 cmd.exe 对 LF 换行的 .bat 支持不完整，
+# call :label / goto 这类跳转在 LF 文件里可能直接失败。
+# 所以 .bat / .cmd 强制 CRLF，其余文本统一 LF。
+* text=auto eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
